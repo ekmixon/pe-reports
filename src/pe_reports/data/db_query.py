@@ -73,12 +73,16 @@ def query_hibp_view(conn, org_uid, start_date, end_date):
         sql = """SELECT * FROM vw_breach_complete
         WHERE organizations_uid = %(org_uid)s
         AND modified_date BETWEEN %(start_date)s AND %(end_date)s"""
-        df = pd.read_sql(
+        return pd.read_sql(
             sql,
             conn,
-            params={"org_uid": org_uid, "start_date": start_date, "end_date": end_date},
+            params={
+                "org_uid": org_uid,
+                "start_date": start_date,
+                "end_date": end_date,
+            },
         )
-        return df
+
     except (Exception, psycopg2.DatabaseError) as error:
         logging.error(f"There was a problem with your database query {error}")
     finally:
@@ -92,7 +96,7 @@ def query_domMasq(conn, org_uid, start_date, end_date):
         sql = """SELECT * FROM dnstwist_domain_masq
         WHERE organizations_uid = %(org_uid)s
         AND date_observed BETWEEN %(start_date)s AND %(end_date)s"""
-        df = pd.read_sql(
+        return pd.read_sql(
             sql,
             conn,
             params={
@@ -101,7 +105,7 @@ def query_domMasq(conn, org_uid, start_date, end_date):
                 "end_date": end_date,
             },
         )
-        return df
+
     except (Exception, psycopg2.DatabaseError) as error:
         logging.error(f"There was a problem with your database query {error}")
     finally:
@@ -123,7 +127,7 @@ def query_shodan(conn, org_uid, start_date, end_date, table):
         sql = """SELECT * FROM %(table)s
         WHERE organizations_uid = %(org_uid)s
         AND timestamp BETWEEN %(start_date)s AND %(end_date)s"""
-        df = pd.read_sql(
+        return pd.read_sql(
             sql,
             conn,
             params={
@@ -133,7 +137,7 @@ def query_shodan(conn, org_uid, start_date, end_date, table):
                 "end_date": end_date,
             },
         )
-        return df
+
     except (Exception, psycopg2.DatabaseError) as error:
         logging.error(f"There was a problem with your database query {error}")
     finally:
@@ -147,7 +151,7 @@ def query_darkweb(conn, org_uid, start_date, end_date, table):
         sql = """SELECT * FROM %(table)s
         WHERE organizations_uid = %(org_uid)s
         AND date BETWEEN %(start_date)s AND %(end_date)s"""
-        df = pd.read_sql(
+        return pd.read_sql(
             sql,
             conn,
             params={
@@ -157,7 +161,7 @@ def query_darkweb(conn, org_uid, start_date, end_date, table):
                 "end_date": end_date,
             },
         )
-        return df
+
     except (Exception, psycopg2.DatabaseError) as error:
         logging.error(f"There was a problem with your database query {error}")
     finally:
@@ -169,12 +173,12 @@ def query_darkweb_cves(conn, table):
     """Query Dark Web CVE table."""
     try:
         sql = """SELECT * FROM %(table)s"""
-        df = pd.read_sql(
+        return pd.read_sql(
             sql,
             conn,
             params={"table": AsIs(table)},
         )
-        return df
+
     except (Exception, psycopg2.DatabaseError) as error:
         logging.error(f"There was a problem with your database query {error}")
     finally:
@@ -188,12 +192,12 @@ def query_cyberSix_creds(conn, org_uid, start_date, end_date):
         sql = """SELECT * FROM public.cybersix_exposed_credentials as creds
         WHERE organizations_uid = %(org_uid)s
         AND breach_date BETWEEN %(start)s AND %(end)s"""
-        df = pd.read_sql(
+        return pd.read_sql(
             sql,
             conn,
             params={"org_uid": org_uid, "start": start_date, "end": end_date},
         )
-        return df
+
     except (Exception, psycopg2.DatabaseError) as error:
         logging.error(f"There was a problem with your database query {error}")
     finally:

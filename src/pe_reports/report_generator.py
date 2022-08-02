@@ -42,8 +42,7 @@ REPORT_OUT = "Customer_ID_Posture_Exposure.pptx"
 
 def load_template():
     """Load PowerPoint template into memory."""
-    prs = Presentation(REPORT_SHELL)
-    return prs
+    return Presentation(REPORT_SHELL)
 
 
 def export_set(prs, out_dir):

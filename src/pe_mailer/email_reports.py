@@ -122,7 +122,7 @@ def get_all_descendants(db, parent):
     """
     current_request = db.requests.find_one({"_id": parent})
     if not current_request:
-        raise ValueError(parent + " has no request document")
+        raise ValueError(f"{parent} has no request document")
 
     descendants = []
     if current_request.get("children"):
@@ -206,9 +206,7 @@ def get_requests(db, agency_list):
     used.
 
     """
-    query = {"retired": {"$ne": True}}
-    query["_id"] = {"$in": agency_list}
-
+    query = {"retired": {"$ne": True}, "_id": {"$in": agency_list}}
     return get_requests_raw(db, query)
 
 
@@ -297,9 +295,7 @@ def send_pe_reports(db, ses_client, pe_report_dir, to):
     contents = os.walk(pe_report_dir)
 
     for folders in contents:
-        for folder_name in folders:
-            agencies.append(folder_name)
-
+        agencies.extend(iter(folders))
     try:
         pe_requests = get_requests(db, agency_list=agencies)
     except TypeError:
@@ -319,10 +315,7 @@ def send_pe_reports(db, ses_client, pe_report_dir, to):
     if pe_report_dir:
         for request in pe_requests:
             id = request["_id"]
-            if to is not None:
-                to_emails = to
-            else:
-                to_emails = get_emails_from_request(request)
+            to_emails = to if to is not None else get_emails_from_request(request)
             # to_emails should contain at least one email
             if not to_emails:
                 continue
@@ -350,8 +343,9 @@ def send_pe_reports(db, ses_client, pe_report_dir, to):
                 )
                 print(match)
                 report_date = datetime.datetime.strptime(
-                    match.group("date"), "%Y-%m-%d"
+                    match["date"], "%Y-%m-%d"
                 ).strftime("%B %d, %Y")
+
 
                 # Construct the Posture and Exposure message to send
                 message = PEMessage(pe_report_filename, report_date, to_emails)
@@ -419,11 +413,7 @@ def send_reports(pe_report_dir, db_creds_file, summary_to=None, test_emails=None
     ses_client = boto3.client("ses", region_name="us-east-1")
 
     # Email the summary statistics, if necessary
-    if test_emails is not None:
-        to = test_emails.split(",")
-    else:
-        to = None
-
+    to = test_emails.split(",") if test_emails is not None else None
     # Send reports and gather summary statistics
     all_stats_strings = []
 
